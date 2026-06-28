@@ -1,0 +1,16 @@
+{
+    "name": "UnityPlugin.PoolManager.Runtime",
+    "rootNamespace": "UnityPlugin",
+    "references": [
+        "UnityPlugin.Singleton.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,13 @@
+{
+  "name": "com.zerowq.unityplugin.poolmanager",
+  "displayName": "Pool Manager",
+  "unity": "2022.3",
+  "version": "1.0.0",
+  "description": "Pool Manager",
+  "author": {
+    "name": "zeroWq"
+  },
+  "dependencies": {
+    "com.zerowq.unityplugin.singleton": "1.0.0"
+  }
+}
