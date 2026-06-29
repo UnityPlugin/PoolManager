@@ -1,6 +1,4 @@
-#define POOL_LOG
-
-using System;
+#define POOL_DEBUG
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +11,8 @@ namespace UnityPlugin
         Dictionary<GameObject, GameObject> _objToPrefab = new();
 
         Dictionary<AsyncOperation, GameObject> _cacheOp = new();
+
+        Transform _container;
 
         public void InitPool(GameObject prefab, int poolSize = 0)
         {
@@ -46,14 +46,18 @@ namespace UnityPlugin
             var op = operation as AsyncInstantiateOperation<GameObject>;
             if (op != null && op.Result.Length > 0 && _cacheOp.TryGetValue(op, out var prefab))
             {
-                GetPool(prefab, out var pool, out _);
-                if (pool != null)
+                GetPool(prefab, out var pool, out var inUse);
+                if (pool == null || inUse == null) return;
+
+                var count = pool.Count + inUse.Count;
+                var container = GetContainer(prefab);
+                var result = op.Result;
+                for (var i = 0; i < result.Length; i++)
                 {
-                    var result = op.Result;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        pool.Enqueue(result[i]);
-                    }
+                    var instance = result[i];
+                    pool.Enqueue(instance);
+                    instance.name = $"{prefab.name}_{count + i}";
+                    instance.transform.SetParent(container);
                 }
             }
         }
@@ -61,7 +65,7 @@ namespace UnityPlugin
         public GameObject Spawn(GameObject prefab, Transform parent = null)
         {
             GetPool(prefab, out var pool, out var inUse);
-            if (pool == null) return null;
+            if (pool == null || inUse == null) return null;
 
             if (pool.TryDequeue(out var result))
             {
@@ -70,6 +74,9 @@ namespace UnityPlugin
             else
             {
                 result = Instantiate(prefab, parent);
+
+                var count = pool.Count + inUse.Count;
+                result.name = $"{prefab.name}_{count}";
             }
 
             _objToPrefab[result] = prefab;
@@ -81,7 +88,7 @@ namespace UnityPlugin
         public void Recycle(GameObject instance)
         {
             var prefab = GetPrefab(instance);
-#if POOL_LOG
+#if POOL_DEBUG
             Debug.LogWarning($"[PoolManager] No prefab for {instance}", instance);
 #endif
             GetPool(prefab, out var pool, out var inUse);
@@ -95,7 +102,7 @@ namespace UnityPlugin
             {
                 if (instance)
                 {
-#if POOL_LOG
+#if POOL_DEBUG
                     Debug.LogWarning($"[PoolManager] Destroy instead recycle {instance}", instance);
 #endif
                     Destroy(gameObject);
@@ -104,6 +111,7 @@ namespace UnityPlugin
             }
 
             pool.Enqueue(instance);
+            instance.transform.SetParent(GetContainer(prefab));
         }
 
         public void DestroyPool(GameObject prefab)
@@ -140,7 +148,7 @@ namespace UnityPlugin
 
             if (prefab == null)
             {
-#if POOL_LOG
+#if POOL_DEBUG
                 Debug.LogWarning($"[PoolManager] GetPool failed by null object");
 #endif
                 return;
@@ -149,7 +157,7 @@ namespace UnityPlugin
             _pools.TryGetValue(prefab, out pool);
             _inUses.TryGetValue(prefab, out inUse);
 
-#if POOL_LOG
+#if POOL_DEBUG
             if (pool == null || inUse == null)
             {
                 Debug.LogWarning($"[PoolManager] Pool is not init for {prefab}", prefab);
@@ -167,10 +175,43 @@ namespace UnityPlugin
             return prefab;
         }
 
-#if POOL_LOG
-        public static void LOG()
+        Transform GetContainer(GameObject prefab)
         {
+            if (_container == null)
+            {
+                var go = new GameObject("Root");
+                go.transform.SetParent(transform);
+                go.SetActive(false);
 
+                _container = go.transform;
+            }
+
+            if (prefab)
+            {
+#if POOL_DEBUG || UNITY_EDITOR
+                var transform = _container.Find(prefab.name);
+                if (transform == null)
+                {
+                    var go = new GameObject(prefab.name);
+                    go.transform.SetParent(_container);
+                    transform = go.transform;
+                }
+
+                return transform;
+#endif
+            }
+            return _container;
+        }
+
+#if UNITY_EDITOR
+        public Dictionary<GameObject, Queue<GameObject>> GetPools()
+        {
+            return _pools;
+        }
+
+        public Dictionary<GameObject, List<GameObject>> GetInUses()
+        {
+            return _inUses;
         }
 #endif
     }
