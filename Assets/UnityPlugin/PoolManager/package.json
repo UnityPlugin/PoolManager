@@ -3,12 +3,8 @@
   "displayName": "Pool Manager",
   "unity": "2022.3",
   "version": "1.0.0",
-  "description": "Pool Manager",
+  "description": "Pool Manager\n\nRequires:\ngit@github.com:UnityPlugin/Singleton.git?path=/Assets/UnityPlugin/Singleton\ngit@github.com:UnityPlugin/IMGUIUtils.git?path=/Assets/UnityPlugin/IMGUIUtils\n",
   "author": {
     "name": "zeroWq"
-  },
-  "dependencies": {
-    "com.zerowq.unityplugin.singleton": "1.0.0",
-    "com.zerowq.unityplugin.imguiutils": "1.0.0"
   }
 }
