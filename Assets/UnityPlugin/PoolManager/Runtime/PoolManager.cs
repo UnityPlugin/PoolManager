@@ -6,13 +6,47 @@ namespace UnityPlugin
 {
     public class PoolManager : Singleton<PoolManager>
     {
+        struct PoolObjDetail
+        {
+            public GameObject prefab;
+            public IPoolable[] poolables;
+        }
+
         Dictionary<GameObject, Queue<GameObject>> _pools = new();
         Dictionary<GameObject, List<GameObject>> _inUses = new();
-        Dictionary<GameObject, GameObject> _objToPrefab = new();
+        Dictionary<GameObject, PoolObjDetail> _objDetail = new();
 
         Dictionary<AsyncOperation, GameObject> _cacheOp = new();
 
         Transform _container;
+        List<IPoolable> _getList = new();
+
+        protected override void OnDestroy()
+        {
+            foreach (var pair in _pools)
+            {
+                pair.Value.Clear();
+            }
+            _pools.Clear();
+
+            foreach (var pair in _inUses)
+            {
+                // outside manager, destroy
+                foreach (var go in pair.Value)
+                {
+                    Destroy(go);
+                }
+                pair.Value.Clear();
+            }
+            _inUses.Clear();
+
+            _objDetail.Clear();
+
+            _cacheOp.Clear();
+            _getList.Clear();
+
+            base.OnDestroy();
+        }
 
         public void InitPool(GameObject prefab, int poolSize = 0)
         {
@@ -52,12 +86,17 @@ namespace UnityPlugin
                 var count = pool.Count + inUse.Count;
                 var container = GetContainer(prefab);
                 var result = op.Result;
+
                 for (var i = 0; i < result.Length; i++)
                 {
                     var instance = result[i];
                     pool.Enqueue(instance);
                     instance.name = $"{prefab.name}_{count + i}";
                     instance.transform.SetParent(container);
+
+                    CreatePoolableDetail(instance, prefab);
+
+                    PoolableCallback(instance, onRecycle: true);
                 }
             }
         }
@@ -77,10 +116,13 @@ namespace UnityPlugin
 
                 var count = pool.Count + inUse.Count;
                 result.name = $"{prefab.name}_{count}";
+
+                CreatePoolableDetail(result, prefab);
             }
 
-            _objToPrefab[result] = prefab;
             if (inUse != null) inUse.Add(result);
+
+            PoolableCallback(result, onSpawn: true);
 
             return result;
         }
@@ -112,6 +154,8 @@ namespace UnityPlugin
 
             pool.Enqueue(instance);
             instance.transform.SetParent(GetContainer(prefab));
+
+            PoolableCallback(instance, onRecycle: true);
         }
 
         public void DestroyPool(GameObject prefab)
@@ -122,7 +166,7 @@ namespace UnityPlugin
             {
                 while (pool.TryDequeue(out var instance))
                 {
-                    _objToPrefab.Remove(instance);
+                    _objDetail.Remove(instance);
                     if (instance) Destroy(instance);
                 }
                 pool.Clear();
@@ -133,7 +177,7 @@ namespace UnityPlugin
             {
                 foreach (var instance in inUse)
                 {
-                    _objToPrefab.Remove(instance);
+                    _objDetail.Remove(instance);
                     if (instance) Destroy(instance);
                 }
                 inUse.Clear();
@@ -168,11 +212,11 @@ namespace UnityPlugin
         GameObject GetPrefab(GameObject instance)
         {
             if (instance == null) return null;
-            if (!_objToPrefab.TryGetValue(instance, out var prefab))
+            if (!_objDetail.TryGetValue(instance, out var detail))
             {
                 return null;
             }
-            return prefab;
+            return detail.prefab;
         }
 
         Transform GetContainer(GameObject prefab)
@@ -203,6 +247,43 @@ namespace UnityPlugin
             return _container;
         }
 
+        #region IPoolable
+
+        void CreatePoolableDetail(GameObject instance, GameObject prefab)
+        {
+            if (instance == null || prefab == null) return;
+            if (_objDetail.ContainsKey(instance)) return;
+
+            _getList.Clear();
+            instance.GetComponents(_getList);
+
+            _objDetail[instance] = new PoolObjDetail
+            {
+                prefab = prefab,
+                poolables = _getList.Count > 0 ? _getList.ToArray() : null,
+            };
+        }
+
+        void PoolableCallback(GameObject instance, bool onSpawn = false, bool onRecycle = false)
+        {
+            if (instance == null) return;
+
+            var poolables = _objDetail[instance].poolables;
+            if (poolables != null)
+            {
+                var l = poolables.Length;
+                for (var i = 0; i < l; i++)
+                {
+                    if (onSpawn) poolables[i].OnRecycle();
+                    if (onRecycle) poolables[i].OnRecycle();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Editor
+
 #if UNITY_EDITOR
         public Dictionary<GameObject, Queue<GameObject>> GetPools()
         {
@@ -214,5 +295,7 @@ namespace UnityPlugin
             return _inUses;
         }
 #endif
+
+        #endregion
     }
 }
