@@ -1,4 +1,4 @@
-#define POOL_DEBUG
+// #define POOL_DEBUG
 using UnityEngine;
 
 namespace UnityPlugin
