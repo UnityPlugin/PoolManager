@@ -1,4 +1,4 @@
-#define POOL_DEBUG
+// #define POOL_DEBUG
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -108,7 +108,7 @@ namespace UnityPlugin
 
             if (pool.TryDequeue(out var result))
             {
-                result.transform.SetParent(parent);
+                result.transform.SetParent(parent, false);
             }
             else
             {
@@ -131,7 +131,10 @@ namespace UnityPlugin
         {
             var prefab = GetPrefab(instance);
 #if POOL_DEBUG
-            Debug.LogWarning($"[PoolManager] No prefab for {instance}", instance);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[PoolManager] No prefab for {instance}", instance);
+            }
 #endif
             GetPool(prefab, out var pool, out var inUse);
 
@@ -153,7 +156,7 @@ namespace UnityPlugin
             }
 
             pool.Enqueue(instance);
-            instance.transform.SetParent(GetContainer(prefab));
+            instance.transform.SetParent(GetContainer(prefab), false);
 
             PoolableCallback(instance, onRecycle: true);
         }
