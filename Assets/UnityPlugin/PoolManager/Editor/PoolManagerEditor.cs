@@ -19,7 +19,7 @@ namespace UnityPlugin
             _pools = _target.GetPools();
             _inUses = _target.GetInUses();
 
-            _fold = new();
+            _fold = new Dictionary<GameObject, bool>();
         }
 
         public override void OnInspectorGUI()

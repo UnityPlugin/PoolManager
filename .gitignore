@@ -8,7 +8,10 @@ Desktop.ini
 
 # VS Code
 .vscode
+.vs
+.vsconfig
 *.vsix
+*.sln
 *.slnx
 *.csproj
 
@@ -19,6 +22,7 @@ Packages/**
 Library/**
 Logs/**
 Temp/**
+obj/**
 
 #UnityPlugin
 Assets/**
