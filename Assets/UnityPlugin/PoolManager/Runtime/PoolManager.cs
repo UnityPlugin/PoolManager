@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityPlugin.Bridge;
 
 namespace UnityPlugin
 {
-    using Bridge;
 
     public class PoolManager : Singleton<PoolManager>
     {

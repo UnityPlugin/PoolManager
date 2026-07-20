@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
+using UnityPlugin.Bridge;
 
 namespace UnityPlugin
 {
@@ -32,50 +34,74 @@ namespace UnityPlugin
                 {
                     EditorGUILayout.LabelField(IMGUIUtils.GetGUIContent("Pool Size"), IMGUIUtils.GetGUIContent(_pools.Count.ToString()));
 
-                    foreach (var pair in _pools)
+                    var sb = UnityGenericPool<StringBuilder>.Get();
+                    try
                     {
-                        IMGUIUtils.ObjectField("Prefab", pair.Key);
-
-                        _fold.TryGetValue(pair.Key, out var fold);
-                        if (IMGUIUtils.IsLastControlClick()) fold = !fold;
-
-                        if (fold)
+                        foreach (var pair in _pools)
                         {
-                            using (IMGUIUtils.Vertical(true))
+                            sb.Clear();
+                            sb.Append("Prefab_").Append(pair.Key.GetInstanceID());
+                            var key = sb.ToString();
+                            var label = IMGUIUtils.GetGUIContent(key);
+
+                            var inPoolCount = pair.Value.Count;
+                            var inUseCount = 0;
+                            if (_inUses.TryGetValue(pair.Key, out var inUse)) inUseCount = inUse.Count;
+
+                            sb.Clear();
+                            sb.Append(pair.Key.name)
+                            .Append('(').Append(inPoolCount + inUseCount).Append(')');
+                            label.text = sb.ToString();
+
+                            IMGUIUtils.ObjectField(key, pair.Key);
+                            _fold.TryGetValue(pair.Key, out var fold);
+                            if (IMGUIUtils.IsLastControlClick()) fold = !fold;
+
+                            if (fold)
                             {
-                                using (var prefabPoolScope = IMGUIUtils.Foldout($"{pair.Key.name}_pool"))
+                                using (IMGUIUtils.Vertical(true))
                                 {
-                                    prefabPoolScope.name.text = $"In Pool : {pair.Value.Count}";
-                                    if (prefabPoolScope.fold && pair.Value.Count > 0)
+                                    sb.Clear();
+                                    sb.Append(pair.Key.name).Append("_pool");
+                                    using (var prefabPoolScope = IMGUIUtils.Foldout(sb.ToString()))
                                     {
-                                        foreach (var p in pair.Value)
+                                        sb.Clear();
+                                        sb.Append("In Pool : ").Append(inPoolCount);
+
+                                        prefabPoolScope.name.text = sb.ToString();
+                                        if (prefabPoolScope.fold && inPoolCount > 0)
                                         {
-                                            IMGUIUtils.ObjectField("", p);
+                                            foreach (var p in pair.Value)
+                                            {
+                                                IMGUIUtils.ObjectField("", p);
+                                            }
                                         }
                                     }
-                                }
 
-                                using (var prefabUseScope = IMGUIUtils.Foldout($"{pair.Key.name}_use"))
-                                {
-                                    var inUseCount = 0;
-                                    if (_inUses.TryGetValue(pair.Key, out var inUse))
+                                    sb.Clear();
+                                    sb.Append(pair.Key.name).Append("_use");
+                                    using (var prefabUseScope = IMGUIUtils.Foldout(sb.ToString()))
                                     {
-                                        inUseCount = inUse.Count;
-                                    }
-
-                                    prefabUseScope.name.text = $"In Use : {inUseCount}";
-                                    if (prefabUseScope.fold && inUseCount > 0)
-                                    {
-                                        foreach (var p in inUse)
+                                        sb.Clear();
+                                        sb.Append("In Use : ").Append(inUseCount);
+                                        prefabUseScope.name.text = sb.ToString();
+                                        if (prefabUseScope.fold && inUseCount > 0)
                                         {
-                                            IMGUIUtils.ObjectField("", p);
+                                            foreach (var p in inUse)
+                                            {
+                                                IMGUIUtils.ObjectField("", p);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        _fold[pair.Key] = fold;
+                            _fold[pair.Key] = fold;
+                        }
+                    }
+                    finally
+                    {
+                        UnityGenericPool<StringBuilder>.Release(sb);
                     }
                 }
             }

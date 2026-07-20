@@ -18,7 +18,6 @@ Desktop.ini
 #Unity
 ProjectSettings/**
 UserSettings/**
-Packages/**
 Library/**
 Logs/**
 Temp/**
