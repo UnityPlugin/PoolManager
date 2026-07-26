@@ -1,10 +1,10 @@
 {
     "name": "UnityPlugin.PoolManager.Editor",
-    "rootNamespace": "UnityPlugin",
     "references": [
         "UnityPlugin.Singleton.Runtime",
         "UnityPlugin.PoolManager.Runtime",
-        "UnityPlugin.IMGUIUtils.Editor"
+        "UnityPlugin.EditorUtils.Editor",
+        "UnityPlugin.Bridge.Runtime"
     ],
     "includePlatforms": [
         "Editor"
@@ -14,7 +14,15 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "ENABLE_EDITOR_UTILS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.zerowq.unityplugin.editorutils",
+            "expression": "1.0.0",
+            "define": "ENABLE_EDITOR_UTILS"
+        }
+    ],
     "noEngineReferences": false
 }

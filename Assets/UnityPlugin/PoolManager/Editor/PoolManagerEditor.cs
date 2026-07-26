@@ -3,8 +3,9 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityPlugin.Bridge;
+using UnityPlugin.EditorUtils;
 
-namespace UnityPlugin
+namespace UnityPlugin.PoolManager
 {
     [CustomEditor(typeof(PoolManager))]
     public class PoolManagerEditor : Editor
@@ -28,11 +29,11 @@ namespace UnityPlugin
         {
             base.OnInspectorGUI();
 
-            using (var poolsScope = IMGUIUtils.Foldout("Pools"))
+            using (var poolsScope = IMGUI.Foldout("Pools"))
             {
                 if (poolsScope.fold)
                 {
-                    EditorGUILayout.LabelField(IMGUIUtils.GetGUIContent("Pool Size"), IMGUIUtils.GetGUIContent(_pools.Count.ToString()));
+                    EditorGUILayout.LabelField(IMGUI.GetGUIContent("Pool Size"), IMGUI.GetGUIContent(_pools.Count.ToString()));
 
                     var sb = UnityGenericPool<StringBuilder>.Get();
                     try
@@ -42,7 +43,7 @@ namespace UnityPlugin
                             sb.Clear();
                             sb.Append("Prefab_").Append(pair.Key.GetInstanceID());
                             var key = sb.ToString();
-                            var label = IMGUIUtils.GetGUIContent(key);
+                            var label = IMGUI.GetGUIContent(key);
 
                             var inPoolCount = pair.Value.Count;
                             var inUseCount = 0;
@@ -53,17 +54,17 @@ namespace UnityPlugin
                             .Append('(').Append(inPoolCount + inUseCount).Append(')');
                             label.text = sb.ToString();
 
-                            IMGUIUtils.ObjectField(key, pair.Key);
+                            IMGUI.ObjectField(key, pair.Key);
                             _fold.TryGetValue(pair.Key, out var fold);
-                            if (IMGUIUtils.IsLastControlClick()) fold = !fold;
+                            if (IMGUI.IsLastControlClick()) fold = !fold;
 
                             if (fold)
                             {
-                                using (IMGUIUtils.Vertical(true))
+                                using (IMGUI.Vertical(true))
                                 {
                                     sb.Clear();
                                     sb.Append(pair.Key.name).Append("_pool");
-                                    using (var prefabPoolScope = IMGUIUtils.Foldout(sb.ToString()))
+                                    using (var prefabPoolScope = IMGUI.Foldout(sb.ToString()))
                                     {
                                         sb.Clear();
                                         sb.Append("In Pool : ").Append(inPoolCount);
@@ -73,14 +74,14 @@ namespace UnityPlugin
                                         {
                                             foreach (var p in pair.Value)
                                             {
-                                                IMGUIUtils.ObjectField("", p);
+                                                IMGUI.ObjectField("", p);
                                             }
                                         }
                                     }
 
                                     sb.Clear();
                                     sb.Append(pair.Key.name).Append("_use");
-                                    using (var prefabUseScope = IMGUIUtils.Foldout(sb.ToString()))
+                                    using (var prefabUseScope = IMGUI.Foldout(sb.ToString()))
                                     {
                                         sb.Clear();
                                         sb.Append("In Use : ").Append(inUseCount);
@@ -89,7 +90,7 @@ namespace UnityPlugin
                                         {
                                             foreach (var p in inUse)
                                             {
-                                                IMGUIUtils.ObjectField("", p);
+                                                IMGUI.ObjectField("", p);
                                             }
                                         }
                                     }

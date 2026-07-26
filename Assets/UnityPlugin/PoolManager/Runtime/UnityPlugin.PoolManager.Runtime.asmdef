@@ -1,8 +1,8 @@
 {
     "name": "UnityPlugin.PoolManager.Runtime",
-    "rootNamespace": "UnityPlugin",
     "references": [
-        "UnityPlugin.Singleton.Runtime"
+        "UnityPlugin.Singleton.Runtime",
+        "UnityPlugin.Bridge.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -48,14 +48,21 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "1016a741494d84b71bf21742e63bd4ad47e98fd8"
+      "hash": "dde963d68c62bfe4cd8a7fa5512b0fea4ee8dce3"
     },
-    "com.zerowq.unityplugin.imguiutils": {
-      "version": "ssh://git@github.com/UnityPlugin/IMGUIUtils.git?path=/Assets/UnityPlugin/IMGUIUtils",
+    "com.zerowq.unityplugin.editorutils": {
+      "version": "ssh://git@github.com/UnityPlugin/EditorUtils.git?path=/Assets/UnityPlugin/EditorUtils",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8dfbd1642d6b9849a0a980ed69c3dc584b3194fd"
+      "hash": "fe2901e3b75f637c6744fb757de1aa952c3d0c19"
+    },
+    "com.zerowq.unityplugin.packageeditor": {
+      "version": "ssh://git@github.com/UnityPlugin/PackageEditor.git?path=/Assets/UnityPlugin/PackageEditor",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "cce948c7d47fe793db95b47d0e099e24aa0c8f96"
     },
     "com.zerowq.unityplugin.singleton": {
       "version": "ssh://git@github.com/UnityPlugin/Singleton.git?path=/Assets/UnityPlugin/Singleton",

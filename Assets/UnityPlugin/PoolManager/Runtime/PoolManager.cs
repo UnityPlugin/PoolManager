@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityPlugin.Bridge;
 
-namespace UnityPlugin
+namespace UnityPlugin.PoolManager
 {
-
     public class PoolManager : Singleton<PoolManager>
     {
         struct PoolObjDetail
@@ -77,6 +76,10 @@ namespace UnityPlugin
                     PoolableCallback(instance, onRecycle: true);
                 }
             }
+
+#if POOL_DEBUG
+            Debug.Log($"[PoolManager] InitPool for {prefab}, size {poolSize}", prefab);
+#endif
         }
 
         public GameObject Spawn(GameObject prefab, Transform parent = null)
@@ -110,12 +113,10 @@ namespace UnityPlugin
         public void Recycle(GameObject instance)
         {
             var prefab = GetPrefab(instance);
-#if POOL_DEBUG
             if (prefab == null)
             {
                 Debug.LogWarning($"[PoolManager] No prefab for {instance}", instance);
             }
-#endif
             GetPool(prefab, out var pool, out var inUse);
 
             if (inUse != null) inUse.Remove(instance);
@@ -124,9 +125,7 @@ namespace UnityPlugin
             {
                 if (instance)
                 {
-#if POOL_DEBUG
                     Debug.LogWarning($"[PoolManager] Destroy instead recycle {instance}", instance);
-#endif
                     Destroy(gameObject);
                 }
                 return;
@@ -164,6 +163,10 @@ namespace UnityPlugin
                 inUse.Clear();
                 _inUses.Remove(prefab);
             }
+
+#if POOL_DEBUG
+            Debug.Log($"[PoolManager] DestroyPool for {prefab}", prefab);
+#endif
         }
 
         void GetPool(GameObject prefab, out Queue<GameObject> pool, out List<GameObject> inUse)
@@ -173,21 +176,17 @@ namespace UnityPlugin
 
             if (prefab == null)
             {
-#if POOL_DEBUG
                 Debug.LogWarning($"[PoolManager] GetPool failed by null object");
-#endif
                 return;
             }
 
             _pools.TryGetValue(prefab, out pool);
             _inUses.TryGetValue(prefab, out inUse);
 
-#if POOL_DEBUG
             if (pool == null || inUse == null)
             {
                 Debug.LogWarning($"[PoolManager] Pool is not init for {prefab}", prefab);
             }
-#endif
         }
 
         GameObject GetPrefab(GameObject instance)

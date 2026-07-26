@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityPlugin
+namespace UnityPlugin.PoolManager
 {
     public static class PoolManagerExt
     {
@@ -29,9 +29,7 @@ namespace UnityPlugin
         {
             if (prefab == null)
             {
-#if POOL_DEBUG
                 Debug.LogWarning($"[PoolManager] null prefab for InitPool<T>");
-#endif
                 return;
             }
 
@@ -42,9 +40,7 @@ namespace UnityPlugin
         {
             if (prefab == null)
             {
-#if POOL_DEBUG
                 Debug.LogWarning($"[PoolManager] null prefab for Spawn<T>");
-#endif
                 return null;
             }
 
@@ -56,9 +52,7 @@ namespace UnityPlugin
         {
             if (prefab == null)
             {
-#if POOL_DEBUG
                 Debug.LogWarning($"[PoolManager] null prefab for Recycle<T>");
-#endif
                 return;
             }
 

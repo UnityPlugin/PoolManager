@@ -1,10 +1,10 @@
 {
-  "name": "com.zerowq.unityplugin.poolmanager",
-  "displayName": "Pool Manager",
-  "unity": "2019.4",
-  "version": "1.0.0",
-  "description": "Pool Manager\n\nRequires:\ngit@github.com:UnityPlugin/Singleton.git?path=/Assets/UnityPlugin/Singleton\ngit@github.com:UnityPlugin/IMGUIUtils.git?path=/Assets/UnityPlugin/IMGUIUtils\ngit@github.com:UnityPlugin/Bridge.git?path=/Assets/UnityPlugin/Bridge\n",
-  "author": {
-    "name": "zeroWq"
-  }
+    "name": "com.zerowq.unityplugin.poolmanager",
+    "displayName": "Pool Manager",
+    "unity": "2019.4",
+    "version": "1.0.0",
+    "description": "Pool Manager\n\nRequires:\ngit@github.com:UnityPlugin/Bridge.git?path=/Assets/UnityPlugin/Bridge\ngit@github.com:UnityPlugin/Singleton.git?path=/Assets/UnityPlugin/Singleton\n\nOptions:\ngit@github.com:UnityPlugin/EditorUtils.git?path=/Assets/UnityPlugin/EditorUtils\n",
+    "author": {
+        "name": "zeroWq"
+    }
 }
