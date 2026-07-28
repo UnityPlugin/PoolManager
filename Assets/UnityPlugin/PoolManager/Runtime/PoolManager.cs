@@ -12,6 +12,14 @@ namespace UnityPlugin.PoolManager
             public IPoolable[] poolables;
         }
 
+        enum PoolObjMethod
+        {
+            OnCreate,
+            OnSpawn,
+            BeforeRecycle,
+            OnRecycle,
+        }
+
         Dictionary<GameObject, Queue<GameObject>> _pools = new Dictionary<GameObject, Queue<GameObject>>();
         Dictionary<GameObject, List<GameObject>> _inUses = new Dictionary<GameObject, List<GameObject>>();
         Dictionary<GameObject, PoolObjDetail> _objDetail = new Dictionary<GameObject, PoolObjDetail>();
@@ -65,15 +73,16 @@ namespace UnityPlugin.PoolManager
                 {
                     var container = GetContainer(prefab);
 
-                    var instance = Instantiate(prefab);
+                    var instance = Instantiate(prefab, container);
                     instance.name = $"{prefab.name}_{pool.Count + inUse.Count}";
-                    instance.transform.SetParent(container);
 
                     pool.Enqueue(instance);
 
                     CreatePoolableDetail(instance, prefab);
 
-                    PoolableCallback(instance, onRecycle: true);
+                    PoolableCallback(instance, PoolObjMethod.OnSpawn);
+                    PoolableCallback(instance, PoolObjMethod.BeforeRecycle);
+                    PoolableCallback(instance, PoolObjMethod.OnRecycle);
                 }
             }
 
@@ -96,7 +105,6 @@ namespace UnityPlugin.PoolManager
             else
             {
                 result = Instantiate(prefab, parent);
-
                 var count = pool.Count + inUse.Count;
                 result.name = $"{prefab.name}_{count}";
 
@@ -105,13 +113,15 @@ namespace UnityPlugin.PoolManager
 
             if (inUse != null) inUse.Add(result);
 
-            PoolableCallback(result, onSpawn: true);
+            PoolableCallback(result, PoolObjMethod.OnSpawn);
 
             return result;
         }
 
         public void Recycle(GameObject instance)
         {
+            PoolableCallback(instance, PoolObjMethod.BeforeRecycle);
+
             var prefab = GetPrefab(instance);
             if (prefab == null)
             {
@@ -134,7 +144,7 @@ namespace UnityPlugin.PoolManager
             pool.Enqueue(instance);
             instance.transform.SetParent(GetContainer(prefab), false);
 
-            PoolableCallback(instance, onRecycle: true);
+            PoolableCallback(instance, PoolObjMethod.OnRecycle);
         }
 
         public void DestroyPool(GameObject prefab)
@@ -245,9 +255,11 @@ namespace UnityPlugin.PoolManager
                 poolables = list.Count > 0 ? list.ToArray() : null,
             };
             UnityListPool<IPoolable>.Release(list);
+
+            PoolableCallback(instance, PoolObjMethod.OnCreate);
         }
 
-        void PoolableCallback(GameObject instance, bool onSpawn = false, bool onRecycle = false)
+        void PoolableCallback(GameObject instance, PoolObjMethod method)
         {
             if (instance == null) return;
 
@@ -257,8 +269,18 @@ namespace UnityPlugin.PoolManager
                 var l = poolables.Length;
                 for (var i = 0; i < l; i++)
                 {
-                    if (onSpawn) poolables[i].OnRecycle();
-                    if (onRecycle) poolables[i].OnRecycle();
+                    switch (method)
+                    {
+                        case PoolObjMethod.OnSpawn:
+                            poolables[i].OnSpawn();
+                            break;
+                        case PoolObjMethod.BeforeRecycle:
+                            poolables[i].BeforeRecycle();
+                            break;
+                        case PoolObjMethod.OnRecycle:
+                            poolables[i].OnRecycle();
+                            break;
+                    }
                 }
             }
         }

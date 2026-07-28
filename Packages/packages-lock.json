@@ -55,7 +55,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "fe2901e3b75f637c6744fb757de1aa952c3d0c19"
+      "hash": "77feb5c700fb4d26b97429b9bb61c2f4057ec5e9"
     },
     "com.zerowq.unityplugin.packageeditor": {
       "version": "ssh://git@github.com/UnityPlugin/PackageEditor.git?path=/Assets/UnityPlugin/PackageEditor",

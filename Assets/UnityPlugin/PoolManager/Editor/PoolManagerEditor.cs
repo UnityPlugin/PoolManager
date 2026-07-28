@@ -33,24 +33,25 @@ namespace UnityPlugin.PoolManager
             {
                 if (poolsScope.fold)
                 {
-                    EditorGUILayout.LabelField(IMGUI.GetGUIContent("Pool Size"), IMGUI.GetGUIContent(_pools.Count.ToString()));
+                    EditorGUILayout.LabelField(IMGUI.GetC("Pool Size"), IMGUI.TmpC(_pools.Count.ToString()));
 
+                    var index = 0;
                     var sb = UnityGenericPool<StringBuilder>.Get();
                     try
                     {
                         foreach (var pair in _pools)
                         {
-                            sb.Clear();
-                            sb.Append("Prefab_").Append(pair.Key.GetInstanceID());
+                            sb.Clear()
+                            .Append("Prefab_").Append(pair.Key.GetInstanceID());
                             var key = sb.ToString();
-                            var label = IMGUI.GetGUIContent(key);
+                            var label = IMGUI.GetC(key);
 
                             var inPoolCount = pair.Value.Count;
                             var inUseCount = 0;
                             if (_inUses.TryGetValue(pair.Key, out var inUse)) inUseCount = inUse.Count;
 
-                            sb.Clear();
-                            sb.Append(pair.Key.name)
+                            sb.Clear()
+                            .Append(index).Append(" : ").Append(pair.Key.name).Append(' ')
                             .Append('(').Append(inPoolCount + inUseCount).Append(')');
                             label.text = sb.ToString();
 
@@ -62,12 +63,12 @@ namespace UnityPlugin.PoolManager
                             {
                                 using (IMGUI.Vertical(true))
                                 {
-                                    sb.Clear();
-                                    sb.Append(pair.Key.name).Append("_pool");
+                                    sb.Clear()
+                                    .Append(pair.Key.name).Append("_pool");
                                     using (var prefabPoolScope = IMGUI.Foldout(sb.ToString()))
                                     {
-                                        sb.Clear();
-                                        sb.Append("In Pool : ").Append(inPoolCount);
+                                        sb.Clear()
+                                        .Append("In Pool : ").Append(inPoolCount);
 
                                         prefabPoolScope.name.text = sb.ToString();
                                         if (prefabPoolScope.fold && inPoolCount > 0)
@@ -98,6 +99,7 @@ namespace UnityPlugin.PoolManager
                             }
 
                             _fold[pair.Key] = fold;
+                            index++;
                         }
                     }
                     finally
